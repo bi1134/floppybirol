@@ -109,8 +109,6 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 		// Stop any ongoing actions or schedules related to gameplay
 		unscheduleAllCallbacks();
 
-		this->stopAllActionsByTag();
-
 		// Your game over logic goes here
 
 		// Set gameOverLayer to be visible
