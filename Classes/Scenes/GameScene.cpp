@@ -10,7 +10,7 @@ Scene* GameScene::createScene()
 	//scene is auto release obj
 	auto scene = Scene::createWithPhysics();
 	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
-	scene->getPhysicsWorld()->setGravity(Vect(0,0));
+	scene->getPhysicsWorld()->setGravity(Vect(0, 0));
 
 
 	//layer is auto release obj
@@ -61,7 +61,7 @@ bool GameScene::init()
 	auto contactListener = EventListenerPhysicsContact::create();
 	contactListener->onContactBegin = CC_CALLBACK_1(GameScene::onContactBegin, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(contactListener, this);
-	
+
 	isGameOver = false;
 
 	retryButton = MenuItemImage::create("retryButton.png", "retryButtonClicked.png", CC_CALLBACK_1(GameScene::retryButtonCallback, this));
@@ -72,9 +72,6 @@ bool GameScene::init()
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 2);
 
-	gameOverLayer = GameOverLayer::create();
-	gameOverLayer->setVisible(false);
-	this->addChild(gameOverLayer, 1);
 
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->setSwallowTouches(true);
@@ -106,18 +103,18 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 	if ((BIRD_COLLISION_BITMASK == a->getCollisionBitmask() && OBSTACLE_COLLISION_BITMASK == b->getCollisionBitmask()) ||
 		(BIRD_COLLISION_BITMASK == b->getCollisionBitmask() && OBSTACLE_COLLISION_BITMASK == a->getCollisionBitmask()))
 	{
-		// Stop any ongoing actions or schedules related to gameplay
 		unscheduleAllCallbacks();
 
-		// Your game over logic goes here
-
-		// Set gameOverLayer to be visible
 		retryButton->setVisible(true);
 
 		// Pause the physics world
 		sceneWorld->setSpeed(0.0f);
 
-		isGameOver = true;
+		// Schedule the cutInHalf method after a short delay
+		scheduleOnce([this](float delay) {
+			bird->cutInHalf();
+			isGameOver = true;
+			}, 0.1f, "cut_in_half");
 
 		return false; // Prevent further processing of collisions
 	}
@@ -151,18 +148,7 @@ void GameScene::update(float dt)
 	bird->Fall();
 }
 
-void GameScene::gameOver()
-{
-	if (!gameOverLayer->isVisible()) // Ensure the game over layer is not already visible
-	{
-		// Stop any ongoing actions or schedules related to gameplay
 
-		// Your game over logic goes here
-
-		// Show the game over layer
-		gameOverLayer->setVisible(true);
-	}
-}
 
 void GameScene::retryButtonCallback(Ref* sender)
 {
@@ -179,5 +165,16 @@ void GameScene::retryButtonCallback(Ref* sender)
 	auto newScene = GameScene::createScene();
 	Director::getInstance()->replaceScene(TransitionFade::create(0.5, newScene));
 
-	// Optionally, you can also perform other actions related to restarting the game here
+}
+
+void Bird::cutInHalf()
+{
+	auto fadeOut = FadeOut::create(0.5f);
+
+	// Run the action on the bird sprite
+	floppyBirol->runAction(fadeOut);
+
+	scheduleOnce([this](float delay) {
+		floppyBirol->removeFromParent();
+		}, 0.5f, "remove_bird");
 }
