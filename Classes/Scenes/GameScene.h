@@ -4,50 +4,46 @@
 #include "cocos2d.h"
 #include "Pipe.h"
 #include "Bird.h"
-#include "GameOverLayer.h"
 
 
-	class GameScene : public cocos2d::Layer {
-	public:
-		static cocos2d::Scene *createScene();
+class GameScene : public cocos2d::Layer {
+public:
+	static cocos2d::Scene* createScene();
 
-		virtual bool init();
+	virtual bool init();
 
-		CREATE_FUNC(GameScene);
+	CREATE_FUNC(GameScene);
 
-		void retryButtonCallback(cocos2d::Ref* sender);
+	void retryButtonCallback(cocos2d::Ref* sender);
 
-	private:
-		void SetPhysicsWorld(cocos2d::PhysicsWorld* world) { sceneWorld = world; };
-		
-		void SpawnPipe(float dt);
+private:
+	void SetPhysicsWorld(cocos2d::PhysicsWorld* world) { sceneWorld = world; };
 
-		bool onContactBegin(cocos2d::PhysicsContact &contact);
+	void SpawnPipe(float dt);
 
-		bool onTouchBegan(cocos2d::Touch *touch, cocos2d::Event *event);
+	bool onContactBegin(cocos2d::PhysicsContact& contact);
 
-		void stopFlying(float dt);
+	bool onTouchBegan(cocos2d::Touch* touch, cocos2d::Event* event);
 
-		void update(float dt);
+	void stopFlying(float dt);
 
-		void gameOver();
+	void update(float dt);
 
-		bool isGameOver;
+	void gameOver();
 
-		GameOverLayer* gameOverLayer;
+	bool isGameOver;
 
-		cocos2d::MenuItemImage* retryButton;
 
-		cocos2d::PhysicsWorld *sceneWorld;
-		
-		Pipe pipe;
+	cocos2d::MenuItemImage* retryButton;
 
-		Bird *bird;
+	cocos2d::PhysicsWorld* sceneWorld;
 
-		unsigned int score;
+	Pipe pipe;
 
-	};
+	Bird* bird;
+
+	unsigned int score;
+
+};
 
 #endif //  __GAME_SCENE_H__
-
-
