@@ -33,6 +33,13 @@ private:
 
 	bool isGameOver;
 
+	cocos2d::Label* scoreLabel;
+
+	cocos2d::Label* outlineLabel;
+
+	unsigned int score;
+
+	void updateScoreLabel();
 
 	cocos2d::MenuItemImage* retryButton;
 
@@ -42,7 +49,6 @@ private:
 
 	Bird* bird;
 
-	unsigned int score;
 
 };
 
