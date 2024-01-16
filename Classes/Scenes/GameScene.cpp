@@ -12,7 +12,6 @@ Scene* GameScene::createScene()
 	scene->getPhysicsWorld()->setDebugDrawMask(PhysicsWorld::DEBUGDRAW_ALL);
 	scene->getPhysicsWorld()->setGravity(Vect(0, 0));
 
-
 	//layer is auto release obj
 	auto layer = GameScene::create();
 	layer->SetPhysicsWorld(scene->getPhysicsWorld());
@@ -68,6 +67,19 @@ bool GameScene::init()
 	retryButton->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2));
 	retryButton->setVisible(false);
 
+	score = 0;
+
+	scoreLabel = Label::createWithTTF("0", "fonts/ARCADECLASSIC.TTF", 24);
+	scoreLabel->setScale(2);
+	scoreLabel->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - scoreLabel->getContentSize().height - 20));
+	this->addChild(scoreLabel, 10000);
+
+	outlineLabel = Label::createWithTTF("0", "fonts/ARCADECLASSIC.TTF", 24);
+	outlineLabel->setScale(scoreLabel->getScale());
+	outlineLabel->setPosition(Vec2(scoreLabel->getPositionX() + 2, scoreLabel->getPositionY() - 2)); // slightly offset (for shadow effect)
+	outlineLabel->setColor(Color3B::BLACK); // set the color to black for the outline
+	this->addChild(outlineLabel, 9999);
+
 	auto menu = Menu::create(retryButton, nullptr);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 2);
@@ -77,8 +89,6 @@ bool GameScene::init()
 	touchListener->setSwallowTouches(true);
 	touchListener->onTouchBegan = CC_CALLBACK_2(GameScene::onTouchBegan, this);
 	Director::getInstance()->getEventDispatcher()->addEventListenerWithSceneGraphPriority(touchListener, this);
-
-	score = 0;
 
 	this->scheduleUpdate();
 
@@ -122,6 +132,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 		(BIRD_COLLISION_BITMASK == b->getCollisionBitmask() && POINT_COLLISION_BITMASK == a->getCollisionBitmask()))
 	{
 		score++;
+		updateScoreLabel();
 		CCLOG("point scored: %i", score);
 	}
 
@@ -146,9 +157,23 @@ void GameScene::stopFlying(float dt)
 void GameScene::update(float dt)
 {
 	bird->Fall();
+
+	updateScoreLabel();
 }
 
+void GameScene::updateScoreLabel()
+{
+	scoreLabel->setString(StringUtils::format("%d", score));
 
+	if (outlineLabel)
+	{
+		outlineLabel->setString(scoreLabel->getString());
+	}
+	else
+	{
+		CCLOG("Outline label not found");
+	}
+}
 
 void GameScene::retryButtonCallback(Ref* sender)
 {
