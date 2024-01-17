@@ -1,44 +1,28 @@
-#include "Bird.h"
-#include "MainMenuScene.h"
-#include "Definitions.h"
-#include "ui/CocosGUI.h"
-#include <AudioEngine.h>
-USING_NS_CC;
+#ifndef __BIRD_H__
+#define __BIRD_H__
 
-Bird::Bird(cocos2d::Layer *layer)
-{
-	visibleSize = Director::getInstance()->getVisibleSize();
-	origin = Director::getInstance()->getVisibleOrigin();
+#include "cocos2d.h"
+#include <cocostudio/SimpleAudioEngine.h>
 
-	floppyBirol = Sprite::create("birol.png");
+	class Bird : public cocos2d::Sprite {
+	public:
+		Bird(cocos2d::Layer * layer);
 
-	floppyBirol->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
+		void Fall();
+		void Fly() { CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Wing.mp3"); isFalling = false; };
+		void StopFlying() { isFalling = true; }
 
-	auto floppyBody = PhysicsBody::createCircle(floppyBirol->getContentSize().width / 2);
-	floppyBody->setCollisionBitmask(BIRD_COLLISION_BITMASK);
-	floppyBody->setContactTestBitmask(true);
+		void cutInHalf();
 
+	private:
+		cocos2d::Size visibleSize;
+		cocos2d::Vec2 origin;
 
-	floppyBirol->setPhysicsBody(floppyBody);
+		cocos2d::Sprite* floppyBirol;
+		bool isFalling;
 
-	layer->addChild(floppyBirol, 100);
+	};
 
-	isFalling = true;
+#endif //  __BIRD_H__
 
-}
-
-void Bird::Fall()
-{
-	if (isFalling == true)
-	{
-		floppyBirol->setPositionX(visibleSize.width / 2 + origin.x);
-		floppyBirol->setPositionY(floppyBirol->getPositionY() - (BIRD_FALLING_SPEED * visibleSize.height));
-	}
-	else
-	{
-		floppyBirol->setPositionX(visibleSize.width / 2 + origin.x);
-		floppyBirol->setPositionY(floppyBirol->getPositionY() + (BIRD_FLYING_SPEED * visibleSize.height));
-	}
-
-}
 
