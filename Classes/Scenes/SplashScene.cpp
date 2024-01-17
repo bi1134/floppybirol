@@ -3,6 +3,7 @@
 #include "Definitions.h"
 #include "ui/CocosGUI.h"
 #include <AudioEngine.h>
+#include <cocostudio/SimpleAudioEngine.h>
 USING_NS_CC;
 
 Scene* SplashScene::createScene()
@@ -33,6 +34,11 @@ bool SplashScene::init()
 	}
 	auto visibleSize = Director::getInstance()->getVisibleSize();
 	Vec2 origin = Director::getInstance()->getVisibleOrigin();
+
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sound/Hit.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sound/Dissapear.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sound/Point.mp3");
+	CocosDenshion::SimpleAudioEngine::getInstance()->preloadEffect("sound/Wing.mp3");
 
 	this->scheduleOnce(CC_SCHEDULE_SELECTOR(SplashScene::GoToMainMenuScene), DISPLAY_TIME_SPLASH_SCENE);
 
