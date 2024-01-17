@@ -71,7 +71,7 @@ bool GameScene::init()
 
 	scoreLabel = Label::createWithTTF("0", "fonts/ARCADECLASSIC.TTF", 24);
 	scoreLabel->setScale(2);
-	scoreLabel->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - scoreLabel->getContentSize().height - 20));
+	scoreLabel->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - scoreLabel->getContentSize().height - 30));
 	this->addChild(scoreLabel, 10000);
 
 	outlineLabel = Label::createWithTTF("0", "fonts/ARCADECLASSIC.TTF", 24);
@@ -80,10 +80,34 @@ bool GameScene::init()
 	outlineLabel->setColor(Color3B::BLACK); // set the color to black for the outline
 	this->addChild(outlineLabel, 9999);
 
+	UserDefault* def = UserDefault::getInstance();
+
+	highScore = def->getIntegerForKey("HIGHSCORE", 0);
+
+	highScoreLabel = Label::createWithTTF("0", "fonts/ARCADECLASSIC.TTF", 24);
+	highScoreLabel->setScale(2);
+	highScoreLabel->setPosition(Vec2(visibleSize.width / 2, visibleSize.height - highScoreLabel->getContentSize().height));
+	highScoreLabel->setVisible(false);
+	this->addChild(highScoreLabel, 20000);
+
+	highScoreOutlineLabel = Label::createWithTTF("0", "fonts/ARCADECLASSIC.TTF", 24);
+	highScoreOutlineLabel->setScale(highScoreLabel->getScale());
+	highScoreOutlineLabel->setPosition(Vec2(highScoreLabel->getPositionX() + 2, highScoreLabel->getPositionY() - 2)); // slightly offset (for shadow effect)
+	highScoreOutlineLabel->setColor(Color3B::BLACK); // set the color to black for the outline
+	highScoreOutlineLabel->setVisible(false);
+	this->addChild(highScoreOutlineLabel, 9998);
+
+	crown = Sprite::create("crown.png");
+	crown->setPosition(Vec2(visibleSize.width + origin.x, visibleSize.height + origin.y));
+	crown->setScale(0.05);
+	crown->setVisible(false);
+	this->addChild(crown);
+
+	def->flush();
+
 	auto menu = Menu::create(retryButton, nullptr);
 	menu->setPosition(Vec2::ZERO);
 	this->addChild(menu, 2);
-
 
 	auto touchListener = EventListenerTouchOneByOne::create();
 	touchListener->setSwallowTouches(true);
@@ -102,6 +126,8 @@ void GameScene::SpawnPipe(float dt)
 
 bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 {
+	auto visibleSize = Director::getInstance()->getVisibleSize();
+
 	if (isGameOver)
 	{
 		return false; // Don't process collision if the game is already over
@@ -115,15 +141,42 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 	{
 		unscheduleAllCallbacks();
 
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Hit.mp3");
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Dissapear.mp3");
+
 		retryButton->setVisible(true);
 
 		// Pause the physics world
 		sceneWorld->setSpeed(0.0f);
 
 		// Schedule the cutInHalf method after a short delay
+
+		scheduleOnce([this, visibleSize](float delay) 
+		{
+				scoreLabel->setAnchorPoint(Vec2(0, 0.5));
+				scoreLabel->setPosition(Vec2(100, visibleSize.height - scoreLabel->getContentSize().height - 30));
+
+				outlineLabel->setAnchorPoint(Vec2(0, 0.5));
+				outlineLabel->setPosition(Vec2(scoreLabel->getPositionX() + 2, scoreLabel->getPositionY() - 2));
+
+				highScoreLabel->setAnchorPoint(Vec2(1, 0.5));
+				highScoreLabel->setPosition(Vec2(visibleSize.width - 100, visibleSize.height - highScoreLabel->getContentSize().height - 30));
+
+				highScoreOutlineLabel->setAnchorPoint(Vec2(1, 0.5));
+				highScoreOutlineLabel->setPosition(Vec2(highScoreLabel->getPositionX() + 2, highScoreLabel->getPositionY() - 2));
+				
+				crown->setPosition(Vec2(highScoreLabel->getPositionX() - 40, highScoreLabel->getPositionY() + 25));
+
+				highScoreLabel->setVisible(true);
+				highScoreOutlineLabel->setVisible(true);
+				crown->setVisible(true);
+		}, 0.05f, "label_transition");
+
 		scheduleOnce([this](float delay) {
 			bird->cutInHalf();
 			isGameOver = true;
+
+
 			}, 0.1f, "cut_in_half");
 
 		return false; // Prevent further processing of collisions
@@ -131,6 +184,8 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 	else if ((BIRD_COLLISION_BITMASK == a->getCollisionBitmask() && POINT_COLLISION_BITMASK == b->getCollisionBitmask()) ||
 		(BIRD_COLLISION_BITMASK == b->getCollisionBitmask() && POINT_COLLISION_BITMASK == a->getCollisionBitmask()))
 	{
+
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Point.mp3");
 		score++;
 		updateScoreLabel();
 		CCLOG("point scored: %i", score);
@@ -173,20 +228,38 @@ void GameScene::updateScoreLabel()
 	{
 		CCLOG("Outline label not found");
 	}
+
+	if (score > highScore)
+	{
+		highScore = score;
+
+		UserDefault* def = UserDefault::getInstance();
+		def->setIntegerForKey("HIGHSCORE", highScore);
+		def->flush();
+	}
+
+	highScoreLabel->setString(StringUtils::format("%d", highScore));
+
+	if (highScoreOutlineLabel)
+	{
+		highScoreOutlineLabel->setString(highScoreLabel->getString());
+	}
+	else
+	{
+		CCLOG("High score outline label not found");
+	}
+
 }
 
 void GameScene::retryButtonCallback(Ref* sender)
 {
-	// Reset the game state (e.g., reset score, position, etc.)
-	// ...
-
-	// Hide the retry button
+	// hide the retry button
 	retryButton->setVisible(false);
 
-	// Set the flag to indicate that the game is not over
+	// set the flag to indicate that the game is not over
 	isGameOver = false;
 
-	// Restart the game scene
+	// restart the game scene
 	auto newScene = GameScene::createScene();
 	Director::getInstance()->replaceScene(TransitionFade::create(0.5, newScene));
 
