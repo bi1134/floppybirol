@@ -37,11 +37,19 @@ private:
 
 	cocos2d::Label* outlineLabel;
 
+	cocos2d::Label* highScoreLabel;
+
+	cocos2d::Label* highScoreOutlineLabel;
+
 	unsigned int score;
+
+	unsigned int highScore;
 
 	void updateScoreLabel();
 
 	cocos2d::MenuItemImage* retryButton;
+
+	cocos2d::Sprite* crown;
 
 	cocos2d::PhysicsWorld* sceneWorld;
 
