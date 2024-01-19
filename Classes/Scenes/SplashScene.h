@@ -17,4 +17,3 @@
 
 #endif //  __SPLASH_SCENE_H__
 
-
