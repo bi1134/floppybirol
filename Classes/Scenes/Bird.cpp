@@ -11,6 +11,7 @@ Bird::Bird(cocos2d::Layer *layer)
 	origin = Director::getInstance()->getVisibleOrigin();
 
 	floppyBirol = Sprite::create("birol.png");
+	floppyBirol->setScale(3.0f);
 
 	floppyBirol->setPosition(Vec2(visibleSize.width / 2 + origin.x, visibleSize.height / 2 + origin.y));
 
