@@ -9,6 +9,7 @@ Pipe::Pipe()
 {
 	visibleSize = Director::getInstance()->getVisibleSize();
 	origin = Director::getInstance()->getVisibleOrigin();
+	unscheduleAllCallbacks();
 }
 
 void Pipe::SpawnPipe(cocos2d::Layer* layer)
@@ -48,7 +49,6 @@ void Pipe::SpawnPipe(cocos2d::Layer* layer)
 	bottomPipe->setPhysicsBody(bottomPipeBody);
 
 	topPipe->setPosition(Vec2(visibleSize.width + topPipe->getContentSize().width + origin.x, topPipePosition));
-
 	bottomPipe->setPosition(Vec2(topPipe->getPositionX(), topPipePosition - (Sprite::create("birol.png")->getContentSize().height * PIPE_GAP) - topPipe->getContentSize().height));
 
 	layer->addChild(topPipe);
@@ -75,4 +75,5 @@ void Pipe::SpawnPipe(cocos2d::Layer* layer)
 	auto pointNodeAction = MoveBy::create(PIPE_MOVEMENT_SPEED * visibleSize.width, Vec2(-visibleSize.width * 1.5, 0));
 
 	pointNode->runAction(pointNodeAction);
+
 }
