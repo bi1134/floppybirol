@@ -99,7 +99,8 @@ bool GameScene::init()
 
 	crown = Sprite::create("crown.png");
 	crown->setPosition(Vec2(visibleSize.width + origin.x, visibleSize.height + origin.y));
-	crown->setScale(0.05);
+	crown->setScale(0.13);
+	crown->setScaleX(0.3);
 	crown->setVisible(false);
 	this->addChild(crown);
 
@@ -141,8 +142,9 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 	{
 		unscheduleAllCallbacks();
 
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Hit.mp3");
+		CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.3f);
 		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Dissapear.mp3");
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Hit.mp3");
 
 		retryButton->setVisible(true);
 
@@ -153,6 +155,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 
 		scheduleOnce([this, visibleSize](float delay) 
 		{
+				scoreLabel->setVisible(false);
 				scoreLabel->setAnchorPoint(Vec2(0, 0.5));
 				scoreLabel->setPosition(Vec2(100, visibleSize.height - scoreLabel->getContentSize().height - 30));
 
@@ -167,6 +170,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 				
 				crown->setPosition(Vec2(highScoreLabel->getPositionX() - 40, highScoreLabel->getPositionY() + 25));
 
+				scoreLabel->setVisible(true);
 				highScoreLabel->setVisible(true);
 				highScoreOutlineLabel->setVisible(true);
 				crown->setVisible(true);
@@ -184,7 +188,7 @@ bool GameScene::onContactBegin(cocos2d::PhysicsContact& contact)
 	else if ((BIRD_COLLISION_BITMASK == a->getCollisionBitmask() && POINT_COLLISION_BITMASK == b->getCollisionBitmask()) ||
 		(BIRD_COLLISION_BITMASK == b->getCollisionBitmask() && POINT_COLLISION_BITMASK == a->getCollisionBitmask()))
 	{
-
+		CocosDenshion::SimpleAudioEngine::getInstance()->setEffectsVolume(0.3f);
 		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("sound/Point.mp3");
 		score++;
 		updateScoreLabel();
